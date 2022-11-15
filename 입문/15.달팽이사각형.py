@@ -4,7 +4,6 @@ arr = [[0]*n for _ in range(n)]
 
 dx, dy = [0, 1, 0, -1], [1, 0, -1, 0]
 dir, total = 0, n*n
-dirCout = n
 x, y = 0, 0
 
 while total:
