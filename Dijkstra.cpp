@@ -16,8 +16,8 @@ struct DATA {
     int node;
     int cost;
     bool operator<(const DATA& x) const {
-        return cost > x.cost; // 나중에 들어온 애가 작으면 우선 순위가 높다 -> 위로 올려준다
-    } // 작은 애가 우선 순위가 높아야 하므로 cost > x.cost가 맞다.
+        return cost > x.cost;
+    }
 };
 
 priority_queue<DATA> pq;

@@ -1950,27 +1950,44 @@ void main(void)
 
 int Print_Selected_Node(SCORE* head, int id, int num)
 {
+	int i = 0;
 
+	head = Search_Id_Node(head, id);
 
+	if (head == (SCORE*)0x0) return -1;
 
+	printf("==================================================================================\n");
 
+	while (i < num)
+	{
+		printf("addr = 0x%.8X, ID=%d, NAME=%s, SCORE=%d, next=0x%.8X, prev=0x%.8X\n", head, head->id, head->name, head->jumsu, head->next, head->prev);
+		i++;
+		if (head->next == (SCORE*)0x0) break;
+		head = head->next;
+	}
 
-
-
-
+	return i;
 }
 
 int Print_Selected_Node_Reverse(SCORE* head, int id, int num)
 {
+	int i = 0;
 
+	head = Search_Id_Node(head, id);
 
+	if (head == (SCORE*)0x0) return -1;
 
+	printf("==================================================================================\n");
 
+	while (i < num)
+	{
+		printf("addr = 0x%.8X, ID=%d, NAME=%s, SCORE=%d, next=0x%.8X, prev=0x%.8X\n", head, head->id, head->name, head->jumsu, head->next, head->prev);
+		i++;
+		if (head->prev->prev == (SCORE*)0x0) break;
+		head = head->prev;
+	}
 
-
-
-
-
+	return i;
 }
 
 #endif
@@ -4325,12 +4342,12 @@ int main(void)
 // [2-3-2.1~4] Segment Tree
 /***********************************************************/
 
-#if 0
+#if 1
 
 /***********************************************************/
 // [2-3-2.1] Segment Tree 자료 확인
 /***********************************************************/
-#if 0
+#if 1
 #include <stdio.h>
 
 #define NUM_DATA	(5)
@@ -4351,7 +4368,7 @@ int Query(int node, int s, int e, int qs, int qe);
 /***********************************************************/
 // [2-3-2.2] 새로운 데이터의 추가 및 데이터 업데이트 함수
 /***********************************************************/
-#if 0
+#if 1
 void Update_New_Data(int node, int s, int e, int idx, int data) // node : node 번호, s ~ e : 구간, idx : 해당 노드에 들어갈 데이터의 인덱스 = leaf 노드만 봤을 때 인덱스
 {
 	int mid;
@@ -4368,7 +4385,7 @@ void Update_New_Data(int node, int s, int e, int idx, int data) // node : node �
 }
 #endif
 
-#if 0
+#if 1
 void main(void)
 {
 	int i;
@@ -4675,12 +4692,12 @@ void main(void)
 // [2-3-3] Fenwick Tree
 /***********************************************************/
 
-#if 1
+#if 0
 
 /***********************************************************/
 // [2-3-3.1] Fenwick Tree �ڷ� Ȯ��
 /***********************************************************/
-#if 1
+#if 0
 #include <stdio.h>
 
 #define NUM_DATA	(16)
@@ -4842,7 +4859,7 @@ int main(void)
 
 struct node
 {
-	char* name;
+	const char* name; // cpp에서는 const를 붙여주어야함
 	struct node* left;
 	struct node* right;
 };
@@ -4903,7 +4920,7 @@ void Print_All_Node3(struct node* p)
 #endif
 
 /***********************************************************/
-// [2-3-4.2] ���� Ʈ���� ���� �⺻ �Լ���
+// [2-3-4.2] 이진 트리를 위한 기본 함수들
 /***********************************************************/
 
 #if 0
@@ -4927,8 +4944,6 @@ SCORE* Root;
 
 #define MAX_ST		20
 
-// �������� ����Ǵ� ��� �Լ��� �� �κп� ������ �߰��Ѵ�
-
 void Print_All_Node(SCORE* p);
 void Delete_All_Node(SCORE* p);
 int Insert_Node(SCORE* head, SCORE* d);
@@ -4944,13 +4959,13 @@ SCORE test[MAX_ST] = { { 10, 50, "kim" }, { 2, 80, "lew" }, { 8, 50, "lew" }, { 
 
 int Create_Data(SCORE* p)
 {
-	printf("\n����� �Է��Ͻÿ� => ");
+	printf("\n사번을 입력하세요 => ");
 	scanf("%d", &p->id);
 	fflush(stdin);
-	printf("이름을 입력하세요=> ");
+	printf("이름을 입력하세요 => ");
 	scanf("%s", p->name);
 	fflush(stdin);
-	printf("������ �Է��Ͻÿ� => ");
+	printf("점수를 입력하세요 => ");
 	scanf("%d", &p->jumsu);
 	fflush(stdin);
 	p->left = (SCORE*)0x0;
@@ -4976,31 +4991,56 @@ void Print_All_Node(SCORE* p)
 #endif
 
 /***********************************************************/
-// [2-3-4.3] ������ �ϳ��� �����Ͽ� Linked List�� �߰��ϴ� �Լ� (calloc ���)
+// [2-3-4.3] 데이터 하나를 생성하여 Linked List에 추가하는 함수 (calloc 사용)
 /***********************************************************/
 
 #if 0
 
-SCORE* Creat_Node(SCORE* d)
+SCORE* Create_Node(SCORE* d)
 {
 	SCORE* p;
 
-	p = calloc(1, sizeof(SCORE));
-	if (p == (void*)0x0) return p;
+	p = (SCORE*)calloc(1, sizeof(SCORE));
+	if (p == (SCORE*)0) return p; // ?
 	*p = *d;
+
+	p->parent = p->left = p->right = (SCORE*)0;
 	return p;
 }
 
-int Insert_Node(SCORE* head, SCORE* d)
+int Insert_Node(SCORE* head, SCORE* d) // head는 root 주소
 {
+	SCORE* newnode = Create_Node(d);
+	if (newnode == (SCORE*)0) return -1;
 
-
-
-
-
-
-
-
+	if (head == (SCORE*)0) { // 아무 노드도 없을 때
+		Root = newnode;
+	}
+	else {
+		SCORE* parent = head; // 새로운 노드를 연결시킬 부모를 찾자. head부터 탐색 시작
+		while (parent) {
+			if (parent->id == newnode->id) {
+				free(newnode);
+				return -2; // 할당받은 것 반납해야함
+			}
+			else if (parent->id > newnode->id) {
+				if (parent->left) parent = parent->left;
+				else {
+					parent->left = newnode; // 왼쪽 자식이 없다.
+					newnode->parent = parent; // 자식도 부모를 연결해주어야함
+					break;
+				}
+			}
+			else {
+				if (parent->right) parent = parent->right;
+				else {
+					parent->right = newnode; // 오른쪽 자식이 없다.
+					newnode->parent = parent;
+					break;
+				}
+			}
+		}
+	}
 }
 
 #endif
@@ -5022,20 +5062,21 @@ void main(void)
 #endif
 
 /***********************************************************/
-// [2-3-4.4] �־��� ����� node�� ã�Ƽ� ����� �ּҸ� �����ϴ� �Լ�
+// [2-3-4.4] 주어진 사번의 node를 찾아서 노드의 주소를 리턴하는 함수
 /***********************************************************/
 
 #if 0
 
 SCORE* Search_Node(SCORE* head, int id)
 {
+	SCORE* node = head;
 
-
-
-
-
-
-
+	while (node) {
+		if (node->id == id) return node;
+		else if (node->id > id) node = node->left;
+		else node = node->right;
+	}
+	return (SCORE*)0;
 }
 
 #endif
@@ -5075,13 +5116,13 @@ void main(void)
 #endif
 
 /***********************************************************/
-// [2-3-4.5] �־��� ����� node�� ã�Ƽ� �����ϴ� �Լ�
+// [2-3-4.5] 주어진 사번의 node를 찾아서 삭제하는 함수
 /***********************************************************/
 
 #if 0
 
 void Delete_All_Node(SCORE* p)
-{
+{ // Post Order로 삭제
 	if (p->left) Delete_All_Node(p->left);
 	if (p->right) Delete_All_Node(p->right);
 	if (p == Root) Root = (SCORE*)0;
@@ -5092,8 +5133,8 @@ void Delete_All_Node(SCORE* p)
 
 #if 0
 
-// ������ ��� ��尡 leaf�� ��� ���� �Լ�
-// main �Լ����� "�ڽ� ���� ����� ����" �κи� ����
+// 삭제할 대상 노드가 leaf인 경우 삭제 함수
+// main 함수에서 "자식 없는 노드의 삭제" 부분만 실험
 
 int Delete_Node(SCORE* head, int id)
 {
@@ -5101,10 +5142,10 @@ int Delete_Node(SCORE* head, int id)
 
 	r = Search_Node(head, id);
 
-	// Ž�� ����
+	// 탐색 실패
 	if (r == NULL) return -1;
 
-	// ������ ��尡 leaf ��� ������ Root�� ��� Root�� NULL ����
+	// 삭제할 노드가 leaf ��� ������ Root�� ��� Root�� NULL ����
 	// Root�� �ƴϸ� ���� ��带 �����ϰ� �ִ� �θ��� left �Ǵ� right�� NULL ����
 
 
@@ -5229,62 +5270,68 @@ int Delete_Node(SCORE* head, int id)
 
 #if 0
 
+SCORE* Find_Successor(SCORE* delnode) { // left 중 가장 큰 것
+	SCORE* successor = delnode->left;
+	while (successor->right) successor = successor->right;
+
+	return successor;
+	/* right 중 가장 작은 것
+	SCORE* successor = delnode->right;
+	while (successor->left) successor = successor->left;
+	return successor;
+	*/
+}
+
+void _Delete_Node(SCORE* delnode) { // 주소를 받은 이상 삭제 실패라는 것은 없으므로 void
+	// 자식 수부터 확인
+	int cnt_child = 0;
+	SCORE* child;
+	SCORE* successor;
+	if (delnode->left) cnt_child++;
+	if (delnode->right) cnt_child++;
+
+	switch (cnt_child){
+	case 0: // 자식이 0개
+		if (delnode->parent == (SCORE*)0) { // delnode가 root인 상황
+			Root = (SCORE*)0;
+		}
+		else {
+			if(delnode->parent->left == delnode) delnode->parent->left = (SCORE*)0; // 삭제할 노드가 왼쪽 자식이었다.
+			else delnode->parent->right = (SCORE*)0;
+		}
+		free(delnode);
+		break;
+	case 1: // 자식을 부모에게 맡기자.
+		child = delnode->left ? delnode->left : delnode->right; // 왼쪽이 존재하면 왼쪽, 오른쪽이 존재하면 오른쪽
+		if (delnode->parent == (SCORE*)0) { // delnode가 root인 상황
+			Root = child;
+			child->parent = (SCORE*)0;
+		}
+		else {
+			child->parent = delnode->parent; // 지울 노드의 자식의 부모를 지울 노드의 부모로
+			if (delnode->parent->left == delnode) delnode->parent->left = child; // 지울 노드가 부모의 왼쪽 자식이었다면, 지울 노드의 자식을 부모의 왼쪽 자식으로
+			else delnode->parent->right = child;
+		}
+		free(delnode);
+		break;
+	case 2:
+		successor = Find_Successor(delnode); // 후계자 찾기
+		delnode->id = successor->id; // 연결 관계를 뺀 data만 복사
+		strcpy(delnode->name, successor->name);
+		delnode->jumsu = successor->jumsu;
+		// 후보자 노드 정리
+		_Delete_Node(successor);
+		break;
+	}
+}
+
 int Delete_Node(SCORE* head, int id)
 {
-	SCORE* p = head;
-	SCORE* prev = Root;
-	SCORE* next;
-	SCORE* temp;
+	SCORE* delnode = Search_Node(head, id);
+	if (delnode == (SCORE*)0) return -1; // 탐색 실패
 
-	while (p != (SCORE*)0)
-	{
-		if (id == p->id) break;
-		prev = p;
-		if (id > p->id) p = p->right;
-		else p = p->left;
-	}
+	_Delete_Node(delnode); // 실제 삭제하는 함수
 
-	// Ž�� ����
-
-	if (p == (SCORE*)0) return -1;
-
-	// Leaf Node ����
-
-	if ((p->left == (SCORE*)0) && (p->right == (SCORE*)0))
-	{
-
-
-
-
-
-
-	}
-
-	// Single Child Node ����
-
-	else if ((p->left == (SCORE*)0) || (p->right == (SCORE*)0))
-	{
-
-
-
-
-
-
-	}
-
-	// �ڽ��� ���� Node ����
-
-	else
-	{
-
-
-
-
-
-
-	}
-
-	free(p);
 	return 1;
 }
 
@@ -5297,15 +5344,15 @@ void main(void)
 	int i;
 	int r;
 
-	/* �ڽ� ���� ����� ���� */
+	/* 자식 없는 노드의 삭제 */
 
 #if 0
 
-	// 1. Root Only ����
+	// 1. Root Only 삭제
 
 	printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", 0, r = Insert_Node(Root, &test[0]), test[0].id);
 	Print_All_Node(Root);
-	printf("Delete Node #10 Result = %d, Root = %d\n", Delete_Node(Root, 10), Root->id);
+	printf("Delete Node #10 Result = %d\n", Delete_Node(Root, 10));
 	printf("Root=%#.8x\n", Root);
 	Print_All_Node(Root);
 
@@ -5313,7 +5360,7 @@ void main(void)
 
 #if 0
 
-	// 2. Left Leaf ��� ����
+	// 2. Left Leaf 노드 삭제
 
 	for (i = 0; i < 7; i++) printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", i, r = Insert_Node(Root, &test[i]), test[i].id);
 	Print_All_Node(Root);
@@ -5326,7 +5373,7 @@ void main(void)
 
 #if 0
 
-	// 3. Right Leaf ��� ����
+	// 3. Right Leaf 노드 삭제
 
 	for (i = 0; i < 20; i++) printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", i, r = Insert_Node(Root, &test[i]), test[i].id);
 	Print_All_Node(Root);
@@ -5337,11 +5384,11 @@ void main(void)
 
 #endif
 
-	/* �ڽ��� 1�� ����� ���� */
+	/* 자식이 1인 노드 삭제 */
 
 #if 0
 
-	// 1. Left�� �ִ� Root ����
+	// 1. Left만 있는 Root 삭제
 
 	for (i = 0; i < 10; i++) printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", i, r = Insert_Node(Root, &test[i]), test[i].id);
 	Print_All_Node(Root);
@@ -5353,7 +5400,7 @@ void main(void)
 
 #if 0
 
-	// 2. Right�� �ִ� Root ����
+	// 2. Right만 있는 Root 삭제
 
 	printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", 0, r = Insert_Node(Root, &test[0]), test[0].id);
 	for (i = 10; i < 20; i++) printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", i, r = Insert_Node(Root, &test[i]), test[i].id);
@@ -5393,11 +5440,11 @@ void main(void)
 
 #endif
 
-	/* �ڽ��� 2�� ����� ����  */
+	/* 자식이 2인 노드 삭제  */
 
 #if 0
 
-	// 1. Root ����
+	// 1. Root 삭제
 
 	for (i = 0; i < 20; i++) printf("[Loop: %d] Insert Node Result=%d, ID=%d\n", i, r = Insert_Node(Root, &test[i]), test[i].id);
 	Print_All_Node(Root);
@@ -5429,3 +5476,15 @@ void main(void)
 #endif
 
 #endif
+
+
+/*
+[삭제에서 사용되는 트리 구조]
+									10
+							2						15
+						1		8			11			17
+							4		9			14	16		20
+						3			
+
+
+*/

@@ -1,0 +1,4 @@
+﻿  ProPractice.cpp
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\ProPractice\ProPractice\ProPractice.cpp(1224,1): warning C4005: 'MAX_ORDER': 매크로 재정의
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\ProPractice\ProPractice\ProPractice.cpp(1110): message : 'MAX_ORDER'의 이전 정의를 참조하십시오.
+  ProPractice.vcxproj -> C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\ProPractice\Debug\ProPractice.exe

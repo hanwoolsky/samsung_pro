@@ -1,0 +1,19 @@
+﻿  STL_practice.cpp
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(398,5): error C2084: 'int main(void)' 함수에 이미 본문이 있습니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(338): message : 'main'의 이전 정의를 참조하십시오.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(448,13): error C2011: 'DATA': 'struct' 형식 재정의
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(324): message : 'DATA' 선언을 참조하십시오.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(460,22): error C2086: 'std::priority_queue<DATA,std::vector<DATA,std::allocator<DATA>>,std::less<_Ty>> pq_st': 재정의
+          with
+          [
+              _Ty=DATA
+          ]
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(336): message : 'pq_st' 선언을 참조하십시오.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(472,7): error C2079: 'test'은(는) 정의되지 않은 struct 'DATA'을(를) 사용합니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(472,18): error C2440: '초기화 중': 'initializer list'에서 'int'(으)로 변환할 수 없습니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(472,18): message : 이니셜라이저에 요소가 너무 많습니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(488,20): error C2109: 첨자는 배열 또는 포인터 형식을 사용해야 합니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(497,8): error C2079: 'd'은(는) 정의되지 않은 struct 'DATA'을(를) 사용합니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(497,10): error C2027: 정의되지 않은 형식 'DATA'을(를) 사용했습니다.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(324): message : 'DATA' 선언을 참조하십시오.
+C:\Users\HanWool\Desktop\samsung_pro\Certi_Pro\STL_practice\STL_practice\STL_practice.cpp(508,20): error C2109: 첨자는 배열 또는 포인터 형식을 사용해야 합니다.
