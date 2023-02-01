@@ -1,51 +1,44 @@
-const int SIZE = 100001;
-int parent[SIZE];
-int score[SIZE];
+#include <cstring>
+using namespace std;
+#define SIZE 100000
 
-int find(int x){
-  if(x == parent[x]){
-    return x;
-  }
-  int root = find(parent[x]);
+int parent[SIZE + 1];
+int score[SIZE + 1];
 
-  if(root != parent[x]){
-    score[x] += score[parent[x]];
-    parent[x] = root;
-  }
-  return root;
+int find(int x) {
+	if (x == parent[x]) return x;
+
+	int root = find(parent[x]);
+	if (root != parent[x]) {
+		score[x] += score[parent[x]];
+		parent[x] = root;
+	}
+	return root;
 }
 
-void init(int N)
-{
-  for(int i = 1; i <= N; i++){
-    parent[i] = i;
-    score[i] = 0;
-  }
+void init(int N) {
+	memset(score, 0, sizeof(score));
+	for (int i = 1; i <= N; i++) {
+		parent[i] = i;
+	}
 }
 
-void updateScore(int mWinnerID, int mLoserID, int mScore)
-{
-  int winner = find(mWinnerID);
-  int loser = find(mLoserID);
-
-  score[winner] += mScore;
-  score[loser] -= mScore;
+void updateScore(int mWinnerID, int mLoserID, int mScore){
+	score[find(mWinnerID)] += mScore;
+	score[find(mLoserID)] -= mScore;
 }
 
-void unionTeam(int mPlayerA, int mPlayerB)
-{
-  int team1 = find(mPlayerA);
-  int team2 = find(mPlayerB);
+void unionTeam(int mPlayerA, int mPlayerB){
+	int rootA = find(mPlayerA);
+	int rootB = find(mPlayerB);
 
-  parent[team1] = team2;
-  score[team1] -= score[team2];
+	parent[rootB] = rootA;
+	score[rootB] -= score[rootA];
 }
 
-int getScore(int mID)
-{
-  int root = find(mID);
-  if(mID == root){
-    return score[mID];
-  }
+int getScore(int mID){
+	int root = find(mID);
+
+	if (root == mID) return score[root];
 	return score[mID] + score[root];
 }
