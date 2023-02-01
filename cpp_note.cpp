@@ -1,39 +1,47 @@
-// unordered_map은 해시테이블로 구현한 자료구조
-// 중복을 허용하지 않는다.
-// 1. 탐색 O(1)
-// 함수
-// unordered_map <string, int> hash;로 선언
-// 1) empty() : 맵이 비어있는지 확인하는 함수
-// 2) size() : 맵의 크기를 확인하는 함수
-// 3) find(key) : key에 해당하는 원소를 찾는 함수
-// 4) count(key) : key에 해당하는 원소의 갯수를 반환
-// 5) insert(make_pairt(key, value)) or insert({key, value}) : 맵에 pair<key, key>를 추가하는 함수
-// 6) erase(key) : 맵에서 key에 해당하는 원소를 제거
-// 7) clear() : 맵을 초기화하는 함수
-// for (auto i : hash){
-//    cout << i.first << i.second << endl;
-//}
-// for (pair<string, int> i : hash){
-//    cout << i.first << i.second << endl;
-//}
+using namespace std;
+
+#include <string> // string keyword, substring
+#include <algorithm> // max, min, sort, fill, memset(? string.h)
+#include <cstring>
+#include <cctype> // isdigit, isalpha
+
+const int INF = (int)1e9; // INF 설정 방법
+
+int M;
+int main(){
+    // 문자열 "2X^2Y^2+3XY" 등이 있을 때 순회하는 방법
+    string poly = "2X^2Y^2+3XY";
+    for(int i = 0; poly[i]; i++){
+        if(poly[i] == '^') continue; // 넘어가고 싶은 문자열 ex) ^, i++ 같은 것 필요없이, 그냥 continue
+    }
+
+    // 배열을 옮겨 붙이거나, 덮어쓸 때
+    int A[6], B[6];
+    int n;
+    for(int i = 0; i < M; i++, n++){
+        A[n] = B[i]; // n은 전역 변수이므로 계속 다음 자리에 원소가 채워진다.
+    }
+
+    // 11110000111100111 군데군데가 빈 배열에서 K번째 수의 idx를 찾고 싶을 때
+    int exist[] = {11110000111100111};
+    int k;
+    for(int i = 0;;i++){ // 언제까지 돌지 모르니 비워두기
+        k -= exist[i];
+        if(k == 0) return i;
+    }
 
 
 
-// map은 Binary Search Tree
-// 1. 탐색 O(logn)
 
 
-// maxHeap을 위한 queue
-// priority_queue<pair<int , int>>
-// priority_queue<pair<int , int>> pq;
-    
-//     pq.push({1,2});
-//     pq.push({1,3});
-//     pq.push({2,2});
-//     pq.push({2,5});
-//     pq.push({3,1});
+    // fill
+    void fill(ForwardIterator first, ForwardIterator last, const T& val);
 
-//     while(!pq.empty()){
-//         cout << pq.top().first << pq.top().second << endl;
-//         pq.pop();
-//     }
+    int min[SIZE];
+    fill(min, min + SIZE, val);
+
+    // 최적화
+    #define f(i, x, n) for (register int i = x; i < n; i++)
+
+
+}

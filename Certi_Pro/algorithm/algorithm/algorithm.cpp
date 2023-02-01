@@ -4077,3 +4077,305 @@ int main(void) {
     return 0;
 }
 #endif
+
+
+#if 0
+/***********************************************************/
+// Test 1. 조깅 (Silver)
+/***********************************************************/
+/*
+교장 선생님은 학생들의 체력을 위해 아침마다 조깅을 시키기로 했다.
+무한히 긴 단일 트랙에서 N(1 <= N <= 100, 000)명의 학생들이 조깅 중이다.각 학생은 트랙의 별개의 위치에서 시작하고 조깅 속도는 같거나 다르다.
+트랙에 차선이 하나 밖에 없기 때문에 다른 학생을 추월할 수 없다.그래서 더 빠른 학생이 다른 학생을 따라 잡았을 때, 느린 학생의 속도에 맞춰서 천천히 달릴 수 밖에 없다.
+그래서 그 학생들은 같은 그룹이 되어 조깅하게 된다.
+학생들은 T(1 <= T <= 1, 000, 000, 000)분 동안 뛰게 될 것이다.이 시간 동안 교장 선생님은 몇 개의 그룹이 만들어지는지 궁금하다.
+데이터가 주어질 때 몇 그룹이 만들어지는지 구하는 프로그램을 작성하시오. (두 명의 학생이 T분이 끝날 때 같은 위치에 있다면 같은 그룹으로 간주합니다.)
+*/
+
+#include <iostream>
+#include <queue>
+
+using namespace std;
+
+struct DATA {
+    int pos;
+    int vel;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int N, T, before_pos, before_vel, pos, vel;
+    deque<DATA> stack;
+
+    cin >> N >> T;
+    for (int i = 0; i < N; i++) {
+        cin >> pos >> vel;
+        while (!stack.empty()) {
+            before_pos = stack.back().pos;
+            before_vel = stack.back().vel;
+            if (before_vel > vel && (long long)before_pos + (long long)(before_vel - vel) * T >= (long long)pos) stack.pop_back();
+            else break;
+        }
+        stack.push_back({ pos, vel });
+    }
+    cout << stack.size();
+}
+#endif
+
+#if 0
+/***********************************************************/
+// Test 2. 투표
+/***********************************************************/
+/*
+사내직원 인기투표가 진행되었다.M명의 직원이 인기 투표에 참여를 해서 N명의 후보 중 한 명을 선택해서 1 이상 10 이하의 점수를 주었다.
+1~3등까지 뽑아서 상품을 주기로 하였다.투표에 참여한 M명은 후보자 N명 중 한 명의 이름과 1 이상 10 이하의 점수를 투표 용지에 적어서 제출한다.
+그러면 직원 별 총점을 계산해서 가장 높은 점수를 받은 사람부터 차례대로 선정해서 1~3등을 선정하는 것이다.
+만약 점수가 같은 경우에는 사번이 빠른 사람을 선택한다.(입력 순서가 사번 순임) 그런데 문제가 발생했다.
+고의인지 실수인지 모르겠지만 투표 용지에 후보자 N명의 명단에 없는 이름들이 적혀있는 것이다.
+어쩔 수 없이 후보자 명단에 없는 이름이 적힌 투표 용지는 무효 처리하기로 했다.
+후보자 수 N과 후보자 명단, 투표 참가 인원 M과 투표 내용이 주어질 때, 1~3등을 찾으시오
+*/
+#include <iostream>
+#include <unordered_map>
+#include <queue>
+
+using namespace std;
+
+struct DATA {
+    int id;
+    int score;
+};
+unordered_map<string, DATA> hmap;
+
+struct idScore {
+    string name;
+    int id;
+    int score;
+};
+struct COMP {
+    bool operator()(idScore& x, idScore& y) {
+        return x.score != y.score ? x.score < y.score : x.id > y.id;
+    }
+};
+priority_queue<idScore, vector<idScore>, COMP> pq;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+
+    int N, M, score;
+    string name;
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> name;
+        hmap.insert({ name, {i, 0} });
+    }
+    cin >> M;
+    for (int i = 0; i < M; i++) {
+        cin >> name >> score;
+        auto it = hmap.find(name);
+        if (it != hmap.end()) hmap[name].score += score;
+    }
+    for (auto it = hmap.begin(); it != hmap.end(); it++) {
+        pq.push({ it->first, it->second.id, it->second.score });
+    }
+    for (int i = 0; i < 3; i++) {
+        cout << pq.top().name << " " << pq.top().score << "\n";
+        pq.pop();
+    }
+
+    return 0;
+}
+#endif
+
+#if 0
+/***********************************************************/
+// Test 3. 
+/***********************************************************/
+/*
+나대충 감독은 N명으로 이뤄진 팀을 구성하려고 한다.총 100,000명의 선수가 있는데 이 중에서 N(1≤N≤50,000)명의 선수를 선발해야 한다.
+선수들은 등번호 ID(1≤ID≤100,000)가 있는데 모두 고유한 번호가 있다.능력치를 나타내는 X(1≤X≤100,000)가 있는데
+선수끼리 같은 능력치가 있을 수도 있고 다를 수도 있다.
+초기에 N명의 선수들이 선발된 명단을 받았는데 나대충 감독 마음에 들지 않아서 일부 선수들을 교체해 보면서 완벽한 팀구성으로 하려고 한다.
+교체하는 방법은 최소 능력치 선수, 또는 최대 능력치 선수, 또는 중간 능력치 선수를 빼고 다른 선수를 넣어보려고한다.
+최소 능력치 선수가 여럿이 있을 경우 ID가 작은 선수를 선택한다.
+최대 능력치 선수가 여럿이 있을 경우 ID가 큰 선수를 선택한다.
+중간 능력치 선수는 N 명의 선수를 1순위 능력치 오름차순, 2순위 ID 오름차순으로 정렬했을 때 중간에 위치한 선수를 선택한다.
+그런데 선수가 너무 많고 능력치가 다양해서 수작업으로는 힘들어서 당신에게 프로그램을 의뢰했다.
+초기에 N명의 ID와 능력치 X가 입력되고 M개의 명령이 입력된다.
+명령은 총 5가지이다.
+1.    0명령은 최소 능력치 선수의 ID와 능력치를 출력하고 해당 선수를 제거한다.
+2.    1명령은 최대 능력치 선수의 ID와 능력치를 출력하고 해당 선수를 제거한다.
+3.    2명령은 중간 능력치 선수의 ID와 능력치를 출력하고 해당 선수를 제거한다.N명이 홀수 일 경우 N명을 정렬했을 때[(N + 1) / 2] 번째 선수이다.
+N명이 짝수일 경우에는[N / 2], [N / 2 + 1] 번째 선수로 두명이고 순서대로 출력한다.
+4.    3명령은 선수를 추가한다. 0~2 명령이 있은 후 항상 3명령이 들어온다. 2명령이 수행된 경우 두명을 선택해야하는 경우에는 3명령이 두 번 들어온다.
+5.    4 명령은 N명을 정렬했을 때, N이 홀수이면[1]~[(N + 1) / 2] 까지 능력치 합과[(N + 1) / 2 + 1]~[N]까지 능력치 합을 공백으로 구분해서 출력한다.
+N이 짝수일 경우[1]~[N / 2]까지 능력치 합과[N / 2 + 1]~[N]까지 능력치 합을 공백으로 구분해서 출력한다. (합은 int 범위를 벗어날 수 있음)
+*/
+#include <iostream>
+#include <queue>
+
+#define MAX_P (100000)
+using namespace std;
+
+struct DATA {
+    int idx;
+    int skill;
+    bool isDeleted;
+
+    DATA* init(int idx, int skill) {
+        this->idx = idx;
+        this->skill = skill;
+        this->isDeleted = false;
+        return this;
+    }
+};
+
+struct MINCOMP {
+    bool operator()(DATA* a, DATA* b) {
+        return a->skill != b->skill ? a->skill < b->skill : a->idx < b->idx;
+    }
+};
+
+struct MAXCOMP {
+    bool operator()(DATA* a, DATA* b) const {
+        return a->skill != b->skill ? a->skill > b->skill : a->idx > b->idx;
+    }
+};
+
+priority_queue<DATA*, vector<DATA*>, MAXCOMP> minPQ; // skill 오름차순, id 오름차순
+priority_queue<DATA*, vector<DATA*>, MINCOMP> maxPQ; // skill 내림차순, id 내림차순
+
+priority_queue<DATA*, vector<DATA*>, MINCOMP> middleMinPQ; // 작은 수 그룹, 크면 클수록 우선순위 높음
+priority_queue<DATA*, vector<DATA*>, MAXCOMP> middleMaxPQ; // 큰 수 그룹, 작으면 작을수록 우선순위 높음
+
+int minNum, maxNum;
+long long minSkill, maxSkill;
+
+DATA realMem[MAX_P + 1];
+int memIdx;
+
+void median(DATA* pdata) {
+    if (middleMinPQ.empty() || middleMinPQ.top()->skill > pdata->skill || (middleMinPQ.top()->skill == pdata->skill && middleMinPQ.top()->idx > pdata->idx)) {
+        middleMinPQ.push(pdata);
+        minNum++;
+        minSkill += (long long)pdata->skill;
+        if (minNum > maxNum + 1) {
+            while (middleMinPQ.top()->isDeleted) middleMinPQ.pop();
+            middleMaxPQ.push(middleMinPQ.top());
+            maxSkill += middleMinPQ.top()->skill;
+            minSkill -= middleMinPQ.top()->skill;
+            middleMinPQ.pop();
+            maxNum++;
+            minNum--;
+        }
+    }
+    else {
+        middleMaxPQ.push(pdata);
+        maxNum++;
+        maxSkill += (long long)pdata->skill;
+        if (maxNum > minNum) {
+            while (middleMaxPQ.top()->isDeleted) middleMaxPQ.pop();
+            middleMinPQ.push(middleMaxPQ.top());
+            maxSkill -= middleMaxPQ.top()->skill;
+            minSkill += middleMaxPQ.top()->skill;
+            middleMaxPQ.pop();
+            minNum++;
+            maxNum--;
+        }
+    }
+}
+
+// 능력치의 합은 long long
+int main() {
+    DATA* data;
+    memIdx = 0;
+    minNum = maxNum = 0;
+    minSkill = maxSkill = 0;
+    int N, M, idx, skill;
+    cin >> N;
+    for (int i = 0; i < N; i++) {
+        cin >> idx >> skill;
+        data = realMem[memIdx++].init(idx, skill);
+        minPQ.push(data);
+        maxPQ.push(data);
+        median(data);
+    }
+
+    int com;
+    cin >> M;
+    for (int i = 0; i < M; i++) {
+        cin >> com;
+        switch (com) {
+        case 0:
+            cout << minPQ.top()->idx << " " << minPQ.top()->skill << "\n";
+            minSkill -= minPQ.top()->skill;
+            minPQ.top()->isDeleted = true;
+            minPQ.pop();
+            minNum--;
+            if (maxNum > minNum) {
+                while (middleMaxPQ.top()->isDeleted) middleMaxPQ.pop();
+                middleMinPQ.push(middleMaxPQ.top());
+                maxSkill -= middleMaxPQ.top()->skill;
+                minSkill += middleMaxPQ.top()->skill;
+                middleMaxPQ.pop();
+                minNum++;
+                maxNum--;
+            }
+            break;
+        case 1:
+            cout << maxPQ.top()->idx << " " << maxPQ.top()->skill << "\n";
+            maxSkill -= maxPQ.top()->skill;
+            maxPQ.top()->isDeleted = true;
+            maxPQ.pop();
+            maxNum--;
+            if (minNum > maxNum + 1) {
+                while (middleMinPQ.top()->isDeleted) middleMinPQ.pop();
+                middleMaxPQ.push(middleMinPQ.top());
+                maxSkill += middleMinPQ.top()->skill;
+                minSkill -= middleMinPQ.top()->skill;
+                middleMinPQ.pop();
+                maxNum++;
+                minNum--;
+            }
+            break;
+        case 2:
+            if ((maxNum + minNum) % 2 == 1) { // 홀수
+                cout << middleMinPQ.top()->idx << " " << middleMinPQ.top()->skill << "\n";
+                minSkill -= middleMinPQ.top()->skill;
+                middleMinPQ.pop();
+                minNum--;
+            }
+            else {
+                cout << middleMinPQ.top()->idx << " " << middleMinPQ.top()->skill << "\n";
+                minSkill -= middleMinPQ.top()->skill;
+                middleMinPQ.pop();
+                minNum--;
+
+                cout << middleMaxPQ.top()->idx << " " << middleMaxPQ.top()->skill << "\n";
+                maxSkill -= middleMaxPQ.top()->skill;
+                middleMaxPQ.pop();
+                maxNum--;
+            }
+            break;
+        case 3:
+            cin >> idx >> skill;
+            data = realMem[memIdx++].init(idx, skill);
+            minPQ.push(data);
+            maxPQ.push(data);
+            median(data);
+            break;
+        case 4:
+            cout << minSkill << " " << maxSkill << "\n";
+            break;
+        }
+    }
+
+
+    return 0;
+}
+#endif
