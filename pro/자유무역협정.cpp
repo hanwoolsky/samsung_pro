@@ -1,86 +1,98 @@
-#include <unordered_map>
 #include <string>
 #include <cstring>
- 
-#define MAXN (500)
-#define MAXL (11)
- 
+#include <unordered_map>
+
+#define MAXN			(500)
+#define MAXL			(11)
+#define MAX_ENT (1000)
 using namespace std;
-unordered_map<string, int> hmap;
- 
-int numA, total;
-int parent[1001], cnt[1001];
-int partner[1001][1001];
-int visited[1001], vn;
- 
-int findRoot(int x) {
-    if (parent[x] == x) return x;
- 
-    return parent[x] = findRoot(parent[x]);
+
+int parent[MAX_ENT + 1];
+int visit[MAX_ENT + 1];
+int cnt[MAX_ENT + 1];
+int collaboration[MAX_ENT + 1][MAX_ENT + 1];
+
+int numA, total, vn;
+unordered_map<string, int> reHash;
+
+void init(int mNumA, char mCompanyListA[MAXN][MAXL], int mNumB, char mCompanyListB[MAXN][MAXL]) {
+	numA = mNumA;
+	total = mNumA + mNumB;
+	reHash.clear();
+	memset(visit, 0, sizeof(visit));
+	memset(cnt, 1, sizeof(cnt));
+	memset(collaboration, 0, sizeof(collaboration));
+    
+	int i = 0;
+	for (i = 0; i < mNumA; i++) {
+		reHash.insert({ mCompanyListA[i], i });
+		parent[i] = i;
+        cnt[i] = 1;
+	}
+	for (i = 0; i < mNumB; i++) {
+		reHash.insert({ mCompanyListB[i], i + mNumA });
+		parent[i + mNumA] = i + mNumA;
+        cnt[i + mNumA] = 1;
+	}
+
 }
- 
-void init(int mNumA, char mCompanyListA[MAXN][MAXL], int mNumB, char mCompanyListB[MAXN][MAXL])
-{
-    numA = mNumA, total = mNumA + mNumB;
-    hmap.clear();
- 
-    int i, j = 0;
-    for (i = 0; i < mNumA; ++i) hmap[mCompanyListA[i]] = ++j;
-    for (i = 0; i < mNumB; ++i) hmap[mCompanyListB[i]] = ++j;
-    for (i = 1; i <= total; ++i) parent[i] = i, cnt[i] = 1;
-    memset(partner, 0, sizeof(partner));
+
+int find(int x) {
+	if (x == parent[x]) return x;
+	return parent[x] = find(parent[x]);
 }
- 
-void startProject(char mCompanyA[MAXL], char mCompanyB[MAXL])
-{
-    int idxA = hmap[mCompanyA], idxB = hmap[mCompanyB];
-    int rootA = findRoot(idxA), rootB = findRoot(idxB);
-    partner[rootA][rootB]++, partner[rootB][rootA]++;
+
+void startProject(char mCompanyA[MAXL], char mCompanyB[MAXL]){
+	int rootA = find(reHash[mCompanyA]);
+	int rootB = find(reHash[mCompanyB]);
+
+	collaboration[rootA][rootB]++;
+	collaboration[rootB][rootA]++;
 }
- 
-void finishProject(char mCompanyA[MAXL], char mCompanyB[MAXL])
-{
-    int idxA = hmap[mCompanyA], idxB = hmap[mCompanyB];
-    int rootA = findRoot(idxA), rootB = findRoot(idxB);
-    partner[rootA][rootB]--, partner[rootB][rootA]--;
+
+void finishProject(char mCompanyA[MAXL], char mCompanyB[MAXL]){
+	int rootA = find(reHash[mCompanyA]);
+	int rootB = find(reHash[mCompanyB]);
+
+	collaboration[rootA][rootB]--;
+	collaboration[rootB][rootA]--;
 }
- 
-void ally(char mCompany1[MAXL], char mCompany2[MAXL])
-{
-    int idxA = hmap[mCompany1], idxB = hmap[mCompany2];
-    int rootA = findRoot(idxA), rootB = findRoot(idxB);
- 
-    if (rootA == rootB) return;
- 
-    parent[rootB] = rootA;
-    cnt[rootA] += cnt[rootB], cnt[rootB] = 0;
- 
-    for (int i = 1; i <= total; ++i) {
-        partner[rootA][i] += partner[rootB][i]; // rootA와 rootB가 둘 다 j 국가와 공동프로젝트를 진행하고 있다면 중복 아닌가?
-        partner[i][rootA] += partner[rootB][i];
-        partner[rootB][i] = partner[i][rootB] = 0;
-    }
+
+void ally(char mCompany1[MAXL], char mCompany2[MAXL]) {
+	int root1 = find(reHash[mCompany1]);
+	int root2 = find(reHash[mCompany2]);
+
+	if (root1 == root2) return;
+
+	parent[root2] = root1;
+	cnt[root1] += cnt[root2];
+	cnt[root2] = 0;
+
+	for (int i = 0; i < total; i++) { // root2가 root1에 흡수되었으니 project도 root1으로 옮기기
+		collaboration[root1][i] += collaboration[root2][i];
+		collaboration[i][root1] += collaboration[i][root2];
+		collaboration[i][root2] = collaboration[root2][i] = 0;
+	}
 }
- 
-int conflict(char mCompany1[MAXL], char mCompany2[MAXL]){
-    int idxA = hmap[mCompany1], idxB = hmap[mCompany2];
-    int rootA = findRoot(idxA), rootB = findRoot(idxB);
-     
-    int ret = 0, tg = ++vn;
-    for (int i = 1; i <= total; ++i) {
-        if (partner[rootA][i]) {
-            visited[findRoot(i)] = tg;
-        }
-    }
-    for (int i = 1; i <= total; ++i) {
-        if (partner[rootB][i]) {
-            int k = findRoot(i);
-            if (visited[k] == tg) {
-                visited[k] = tg - 1;
-                ret += cnt[k];
-            }
-        }
-    }
- 
-    return ret;
+
+int conflict(char mCompany1[MAXL], char mCompany2[MAXL]) {
+	int conf1 = find(reHash[mCompany1]);
+	int conf2 = find(reHash[mCompany2]);
+
+	int ans = 0;
+	int tg = ++vn; // conflict가 한번 일어나고 모든 visit을 0으로 초기화할 수 없으므로 매 스텝마다 ++한 값과 비교
+	for (int i = 0; i < total; i++) {
+		if(collaboration[conf1][i]) visit[find(i)] = tg;
+	}
+	for (int i = 0; i < total; i++) {
+		if (collaboration[conf2][i]) {
+			int k = find(i);
+			if (visit[k] == tg) {
+				visit[k] = tg - 1;
+				ans += cnt[k];
+			}
+		}
+	}
+
+	return ans;
 }
