@@ -163,40 +163,96 @@ int removeBlocks(int mTimestamp)
 
     return blocks;
 }
-
 // think 1. it로 돌리면 새로운 데이터를 추가하면서 탐색해야할 데이터가 늘지 않나? => 안 늘어요.
 
 
-//int main() {
-//    init(10, 15);
-//    int ans;
-//    ans = dropBlocks(1, 3, 5);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(3, 12, 3);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(10, 5, 9);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(14, 0, 15);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(24, 1, 3);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(26, 0, 5);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(28, 9, 4);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(31, 2, 9);
-//    printf("%d\n", ans);
-//
-//    ans = removeBlocks(34);
-//    printf("%d\n", ans);
-//
-//    ans = dropBlocks(35, 12, 3);
-//    printf("%d\n", ans);
-//    ans = dropBlocks(36, 0, 15);
-//    printf("%d\n", ans);
-//
-//    ans = removeBlocks(37);
-//    printf("%d\n", ans);
-//
-//    return 1;
-//}
+// #[way2] 시간 단축, 생각해야 할 예외 지점 증가
+using namespace std;
+#include <cstring>
+#include <set>
+
+struct DATA {
+    int timestamp;
+    int col;
+    int length;
+    bool operator<(const DATA& t) const {
+        return timestamp != t.timestamp ? timestamp < t.timestamp : col < t.col;
+    }
+};
+
+set<DATA> board; // timestamp 작은 순, col 작은 순 
+
+const int LM = 10001;
+int underBlock[LM];
+int row, column;
+int blocks;
+
+void curStatus(int curTime) {
+    for (auto it = board.begin(); it != board.end();) {
+        if (curTime - it->timestamp + 1 > row) {
+            blocks -= it->length;
+            it = board.erase(it);
+        }
+        else break;
+    }
+}
+
+void init(int R, int C){
+    row = R, column = C;
+    blocks = 0;
+    board.clear();
+}
+
+int dropBlocks(int mTimestamp, int mCol, int mLen)
+{
+    curStatus(mTimestamp);
+
+    board.insert({mTimestamp, mCol, mLen});
+    blocks += mLen;
+
+    return blocks;
+}
+
+int removeBlocks(int mTimestamp)
+{
+    curStatus(mTimestamp);
+    memset(underBlock, 0, LM * sizeof(int));
+
+    int times, start, end, s, e, i;
+    int removeBlock = 0;
+    for (auto it = board.begin(); it != board.end();) {
+        times = it->timestamp; start = it->col; end = it->col + it->length;
+        it = board.erase(it);
+        s = start; e = end;
+        for (i = start; i < end - 1; i++){
+            if (underBlock[i] != underBlock[i + 1]) {
+                if (underBlock[i] == 0) {
+                    s = i + 1;
+                    underBlock[i] = 1;
+                    removeBlock++;
+                }
+                else {
+                    e = i + 1;
+                    board.insert({ times, s, e - s });
+                }
+            }
+            else {
+                if (underBlock[i] == 0) {
+                    underBlock[i] = 1;
+                    removeBlock++;
+                }
+            }
+        }
+        if (underBlock[i] == 0) {
+            underBlock[i] = 1;
+            removeBlock++;
+        }
+        else {
+            e = i + 1;
+            board.insert({ times, s, e - s });
+        }
+    }
+    blocks -= removeBlock;
+
+    return blocks;
+}
