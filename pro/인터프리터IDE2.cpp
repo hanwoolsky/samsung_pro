@@ -1,11 +1,10 @@
 using namespace std;
  
 #include<list>
-#include<stack>
 #include<string>
 #include<cstring> // memcpy
-#include<ctype.h> // isdigit(), isalpha()
-#include<algorithm> // max
+#include<ctype.h> // isdigit(), isalpha() -> 왜 없어도 통과할까?
+#include<algorithm> // max -> 왜 없어도 통과할까?
  
 struct Data {
     string com;
@@ -96,3 +95,101 @@ int getValue(char mVariable){
  
 // erase(iter it)의 반환값은 삭제한 반환값 뒤의 iter
 // pit = erase(iter it)를 통해 iter를 받아놔야 계속해서 그 iter를 증감으로 활용할 수 있다.
+
+
+// 2023.02.05 stack 계산이 부족
+#include <string>
+#include <cstring>
+#include <cctype>
+#include <list>
+#include <algorithm>
+using namespace std;
+
+struct LINE {
+	string com;
+	int value[26];
+};
+
+list<LINE> dataList;
+list<LINE>::iterator pre, cur;
+
+int numStack[200];
+char operStack[200];
+int numIdx, operIdx;
+
+void calc() {
+	if (operIdx && operStack[operIdx - 1] != '(') {
+		numIdx--, operIdx--;
+		if (operStack[operIdx] == '+') numStack[numIdx - 1] += numStack[numIdx];
+		if (operStack[operIdx] == '-') numStack[numIdx - 1] -= numStack[numIdx];
+		if (operStack[operIdx] == '*') numStack[numIdx - 1] *= numStack[numIdx];
+		if (operStack[operIdx] == '/') numStack[numIdx - 1] = numStack[numIdx] ? numStack[numIdx - 1] / numStack[numIdx] : 0;
+		numStack[numIdx - 1] = max(0, numStack[numIdx - 1]) % 10000;
+	}
+}
+
+int calcResult(string command) {
+	numIdx = operIdx = 0;
+	for (int i = 0; i < command.size(); i++) {
+		if (isdigit(command[i])) numStack[numIdx++] = command[i] - '0';
+		else if (isalpha(command[i])) numStack[numIdx++] = pre->value[command[i] - 'A'];
+		else {
+			if (command[i] != '(') calc();
+			if (command[i] == ')') operIdx--;
+			else operStack[operIdx++] = command[i];
+		}
+	}
+	calc();
+	return numStack[0];
+}
+
+void calculate() {
+	pre = prev(cur, 1);
+	memcpy(cur->value, pre->value, sizeof(int) * 26);
+	string command = cur->com + ',';
+	int idx = 0, s, e; // idx는 변수의 위치, s는 식의 시작 위치, e는 식의 끝 , 위치
+	for (s = command.find('=') + 1; s < command.size(); s = e + 1) {
+		e = command.find(',', s); // s 위치 이후의 ,를 찾는다.
+		cur->value[command[idx] - 'A'] = calcResult(command.substr(s, e - s));
+		idx += 2;
+	}
+}
+
+int pos;
+void init(){
+	dataList.clear();
+	dataList.push_back({});
+	cur = dataList.end();
+	pos = 1;
+}
+
+void destroy(){
+}
+
+int addCommand(char mCommand[]){
+	cur = dataList.insert(cur, { mCommand });
+	return pos;
+}
+
+int moveCursor(int mPos) {
+	for (int i = 0; i < mPos && cur != dataList.end(); i++) {
+		calculate();
+		cur = next(cur, 1);
+		pos++;
+	}
+	for (int i = 0; i < -mPos && pos > 1; i++) {
+		cur = prev(cur, 1);
+		pos--;
+	}
+	return pos;
+}
+
+void eraseCommand(){
+	if (cur != dataList.end()) { // 만약 커서가 빈 줄에 있지 않다면 = 마지막 줄에 있지 않다면
+		cur = dataList.erase(cur);
+	}
+}
+
+int getValue(char mVariable){
+	return prev(cur, 1)->value[mVariable - 'A'];;
+}
