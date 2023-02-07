@@ -1,6 +1,6 @@
 using namespace std;
 
-#include <string> // string keyword, substring(command.substr(시작 위치, 개수))
+#include <string> // string keyword, substring(command.substr(시작 위치, 개수)), reverse(str.begin(), str.end())(문자열 뒤집기)
 #include <algorithm> // max, min, sort, fill)
 #include <cstring> // memset, memcpy
 #include <cctype> // isdigit, isalpha
@@ -37,13 +37,21 @@ int main(){
     com.find("원하는 문자", pos, cnt); // 원하는 문자의 위치부터 cnt개만큼을 취한 부분 문자열을 return한다.
     // 문자열을 찾는데 실패하면 string::npos로 정의되는 상수 npos를 리턴한다.
 
-    // 5. fill
+    // 5. string reverse, string strncmp
+    string str = "";
+    reverse(str.begin(), str.end());
+
+    char str1[10], str2[10]; // string으로 하면 안됨
+    int cnt;
+    strncmp(str1, str2, cnt) < 0; // str1[0:cnt] < str2[0:cnt] 
+
+    // 6. fill
     void fill(ForwardIterator first, ForwardIterator last, const T& val);
 
     int min[SIZE];
     fill(min, min + SIZE, val);
 
-    // 6. 최적화
+    // 7. 최적화
     #define f(i, x, n) for (register int i = x; i < n; i++)
 
 

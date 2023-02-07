@@ -1,0 +1,2 @@
+병사관리 : 자료구조 & splice
+자유무역협정 : ally의 for문 & conflict 함수
