@@ -1,7 +1,7 @@
 using namespace std;
 
 #include <string> // string keyword, substring(command.substr(시작 위치, 개수)), reverse(str.begin(), str.end())(문자열 뒤집기)
-#include <algorithm> // max, min, sort, fill)
+#include <algorithm> // max, min, sort, fill
 #include <cstring> // memset, memcpy
 #include <cctype> // isdigit, isalpha
 
@@ -44,6 +44,9 @@ int main(){
     char str1[10], str2[10]; // string으로 하면 안됨
     int cnt;
     strncmp(str1, str2, cnt) < 0; // str1[0:cnt] < str2[0:cnt] 
+
+    // 6. string erase
+    str.erase(pos, cnt);
 
     // 6. fill
     void fill(ForwardIterator first, ForwardIterator last, const T& val);
