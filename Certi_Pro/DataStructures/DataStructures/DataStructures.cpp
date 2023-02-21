@@ -4370,7 +4370,7 @@ int Query(int node, int s, int e, int qs, int qe);
 // [2-3-2.2] 새로운 데이터의 추가 및 데이터 업데이트 함수
 /***********************************************************/
 #if 1
-void Update_New_Data(int node, int s, int e, int idx, int data) // node : node 번호, s ~ e : 구간, idx : 해당 노드에 들어갈 데이터의 인덱스 = leaf 노드만 봤을 때 인덱스
+void Update_New_Data(int node, int s, int e, int idx, int data) // node : tree에서의 idx, s ~ e : 구간, idx : 해당 노드에 들어갈 데이터의 인덱스 = leaf 노드만 봤을 때 인덱스
 {
 	int mid;
 	if (s == e) { // 데이터 한개짜리 leaf node
