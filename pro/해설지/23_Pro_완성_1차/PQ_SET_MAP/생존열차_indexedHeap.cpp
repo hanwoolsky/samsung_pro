@@ -1,179 +1,226 @@
-#include <algorithm>
-#define MAX_N 100000
-#define MAX_C 10
-
+#if 1
+#include <memory.h>
 using namespace std;
-
-struct passenger{
+ 
+#define MAX_T   (10)
+#define MAX_J   (1000)
+#define MAX_M   (10000)
+#define MAX_N   (100000)
+ 
+struct Passanger
+{
     int pid;
-    int jid;
     int point;
-    int carNum;
-    int heapHIdx;
-    int heapLIdx;
-} pass[MAX_N + 1];
-
-struct heapH{
-    passenger* tree[MAX_N + 1];
+    int jid;
+    int room; // 객차 번호
+    int pqidx[2]; // [0] = 내림차순, [1] = 오름차순
+};
+Passanger passanger[MAX_N];
+int passanger_cnt;
+ 
+int jobTable[MAX_J][200];
+int job_cnt[MAX_J];
+ 
+bool compare(int pos, register Passanger* a, register Passanger* b)
+{
+    if (pos == 0)
+    {
+        return (a->point != b->point) ? (a->point > b->point): (a->pid < b->pid);
+    }
+    else
+    {
+        return (a->point != b->point) ? (a->point < b->point) : (a->pid > b->pid);
+    }
+}
+ 
+struct Heap
+{
     int heapSize;
-
-    void init(){
-        heapSize = 0;
-    }
-
-    int comp(passenger* child, passenger* parent){
-        return child->point != parent->point ? child->point > parent->point : child->pid < parent->pid; // 포인트는 크고 pid는 작은 child가 우선순위 높
-    }
-
-    void heapUp(int curIdx){
-        int parent = (curIdx - 1) / 2;
-        while(parent >= 0){
-            if(comp(tree[curIdx], tree[parent])){
-                swap(tree[curIdx], tree[parent]);
-                tree[curIdx]->heapHIdx = curIdx;
-                tree[parent]->heapHIdx = parent;
-
-                curIdx = parent; parent = (curIdx - 1) / 2;
-            }
-            else break;
+    Passanger* heap[MAX_M];
+ 
+    void up(int current, int pos)
+    {
+        while (current > 0 && compare(pos, heap[current], heap[(current - 1) / 2]))
+        {
+            Passanger* temp = heap[current];
+            heap[current] = heap[(current - 1) / 2];
+            heap[(current - 1) / 2] = temp;
+ 
+            heap[current]->pqidx[pos] = current;
+            heap[(current - 1) / 2]->pqidx[pos] = (current - 1) / 2;
+ 
+            current = (current - 1) / 2;
         }
     }
-
-    void heapDown(int curIdx){
-        int child;
-        int Lchild = curIdx * 2 + 1;
-        int Rchild = Lchild + 1;
-
-        while(Lchild < heapSize){
-            if(Lchild == heapSize - 1) child = Lchild;
-            else child = comp(tree[Lchild], tree[Rchild]) ? Lchild : Rchild;
-
-            if(comp(tree[child], tree[curIdx])){
-                swap(tree[child], tree[curIdx]);
-                tree[curIdx]->heapHIdx = curIdx;
-                tree[child]->heapHIdx = child;
-
-                curIdx = child; Lchild = curIdx * 2 + 1; Rchild = Lchild + 1;
-            }
+ 
+    void down(int current, int pos)
+    {
+        while (current * 2 + 1 < heapSize)
+        {
+            int child;
+            if (current * 2 + 2 == heapSize) child = current * 2 + 1;
+            else child = compare(pos, heap[current * 2 + 1], heap[current * 2 + 2]) ? current * 2 + 1 : current * 2 + 2;
+ 
+            if (compare(pos, heap[current], heap[child])) break;
+ 
+            Passanger* temp = heap[current];
+            heap[current] = heap[child];
+            heap[child] = temp;
+ 
+            heap[current]->pqidx[pos] = current;
+            heap[child]->pqidx[pos] = child;
+ 
+            current = child;
         }
     }
-
-    void heapPush(passenger* data){
-        tree[heapSize] = data;
-        data->heapHIdx = heapSize++;
-        heapUp(heapSize - 1);
+ 
+    void heapPush(Passanger* value, int pos)
+    {
+        if (heapSize >= MAX_M) return;
+ 
+        heap[heapSize] = value;
+        heap[heapSize]->pqidx[pos] = heapSize;
+         
+        up(heapSize, pos);
+        heapSize++;
     }
-
-    passenger heapPop(){
-        passenger p = *tree[0];
-
-        tree[0] = tree[--heapSize];
-        tree[0]->heapHIdx = 0;
-        heapDown(0);
-
-        return p;
+ 
+    Passanger* heapPop(int pos)
+    {
+        if (heapSize <= 0) return 0;
+ 
+        heapSize--;
+        Passanger* temp = heap[0];
+        heap[0] = heap[heapSize];
+        heap[0]->pqidx[pos] = 0;
+ 
+        down(0, pos);
+        return temp;
     }
-
-    void heapDelete(int idx){
-        passenger p = *tree[idx];
-        tree[idx] = tree[--heapSize];
-        tree[idx]->heapHIdx = idx;
-        heapUp(idx);
-        heapDown(idx);
+ 
+    void heapUpdate(int current, int pos)
+    {
+        up(current, pos);
+        down(current, pos);
     }
-} carH[MAX_C];
-
-struct heapH{
-    passenger* tree[MAX_N + 1];
-    int heapSize;
-
-    void init(){
-        heapSize = 0;
-    }
-
-    int comp(passenger* child, passenger* parent){
-        return child->point != parent->point ? child->point < parent->point : child->pid > parent->pid; // 포인트는 작고 pid는 큰 child가 우선순위 높
-    }
-
-    void heapUp(int curIdx){
-        int parent = (curIdx - 1) / 2;
-        while(parent >= 0){
-            if(comp(tree[curIdx], tree[parent])){
-                swap(tree[curIdx], tree[parent]);
-                tree[curIdx]->heapLIdx = curIdx;
-                tree[parent]->heapLIdx = parent;
-
-                curIdx = parent; parent = (curIdx - 1) / 2;
-            }
-            else break;
+ 
+    void heapDelete(int current, int pos)
+    {
+        if (heapSize <= 0) return;
+ 
+        heapSize--;
+        if (current < heapSize)
+        {
+            heap[current] = heap[heapSize];
+            heap[current]->pqidx[pos] = current;
+            heapUpdate(current, pos);
         }
     }
-
-    void heapDown(int curIdx){
-        int child;
-        int Lchild = curIdx * 2 + 1;
-        int Rchild = Lchild + 1;
-
-        while(Lchild < heapSize){
-            if(Lchild == heapSize - 1) child = Lchild;
-            else child = comp(tree[Lchild], tree[Rchild]) ? Lchild : Rchild;
-
-            if(comp(tree[child], tree[curIdx])){
-                swap(tree[child], tree[curIdx]);
-                tree[curIdx]->heapLIdx = curIdx;
-                tree[child]->heapLIdx = child;
-
-                curIdx = child; Lchild = curIdx * 2 + 1; Rchild = Lchild + 1;
-            }
-        }
-    }
-
-    void heapPush(passenger* data){
-        tree[heapSize] = data;
-        data->heapLIdx = heapSize++;
-        heapUp(heapSize - 1);
-    }
-
-    passenger heapPop(){
-        passenger p = *tree[0];
-
-        tree[0] = tree[--heapSize];
-        tree[0]->heapLIdx = 0;
-        heapDown(0);
-
-        return p;
-    }
-
-    void heapDelete(int idx){
-        passenger p = *tree[idx];
-        tree[idx] = tree[--heapSize];
-        tree[idx]->heapLIdx = idx;
-        heapUp(idx);
-        heapDown(idx);
-    }
-} carL[MAX_C];
-
+ 
+}train[MAX_T][2]; // [0] = 내림차순, [1] = 오름차순
+ 
+int N, M, J;
+ 
 void init(int N, int M, int J, int mPoint[], int mJobID[])
 {
-
+    passanger_cnt = 0;
+    memset(job_cnt, 0, sizeof(job_cnt));
+    for (int i = 0; i < MAX_T; i++) train[i][0].heapSize = train[i][1].heapSize = 0;
+ 
+    ::N = N;
+    ::M = M;
+    ::J = J;
+ 
+    for (int i = 0; i < N; i++)
+    {
+        passanger[passanger_cnt] = { i, mPoint[i], mJobID[i], i / M, {0,0} };
+        Passanger* temp = &passanger[passanger_cnt++];
+ 
+        jobTable[mJobID[i]][job_cnt[mJobID[i]]++] = i;
+ 
+        train[temp->room][0].heapPush(temp, 0);
+        train[temp->room][1].heapPush(temp, 1);
+    }
 }
-
-void destroy()
-{
-
-}
-
+ 
+void destroy() { }
+ 
 int update(int mID, int mPoint)
 {
-	return -1;
+    Passanger* temp = &passanger[mID];
+    temp->point += mPoint;
+ 
+    train[temp->room][0].heapUpdate(temp->pqidx[0], 0);
+    train[temp->room][1].heapUpdate(temp->pqidx[1], 1);
+     
+    return temp->point;
 }
-
+ 
 int updateByJob(int mJobID, int mPoint)
 {
-	return -2;
+    int sum = 0;
+    for (int i = 0; i < job_cnt[mJobID]; i++)
+    {
+        int pid = jobTable[mJobID][i];
+        Passanger* temp = &passanger[pid];
+ 
+        temp->point += mPoint;
+        sum += temp->point;
+ 
+        train[temp->room][0].heapUpdate(temp->pqidx[0], 0);
+        train[temp->room][1].heapUpdate(temp->pqidx[1], 1);
+    }
+    return sum;
 }
-
+ 
+Passanger* changeSeat[100];
+ 
 int move(int mNum)
-{	
-	return -3;
+{
+    int sum = 0;
+    int cnt = 0;
+ 
+    for (int i = 0; i < (N / M); i++)
+    {
+        int change = mNum;
+        if (i != 0) // 첫 번째 객차인 경우
+        {
+            while (train[i][0].heapSize > 0 && change-- > 0)
+            {
+                Passanger* temp = train[i][0].heapPop(0);
+                train[i][1].heapDelete(temp->pqidx[1], 1);
+                 
+                sum += temp->point;
+                temp->room = i - 1;
+ 
+                changeSeat[cnt++] = temp;
+            }
+        }
+ 
+        change = mNum;
+        if (i != (N / M - 1)) // 마지막 객차인 경우
+        {
+            while (train[i][1].heapSize > 0 && change-- > 0)
+            {
+                Passanger* temp = train[i][1].heapPop(1);
+                train[i][0].heapDelete(temp->pqidx[0], 0);
+ 
+                sum += temp->point;
+                temp->room = i + 1;
+ 
+                changeSeat[cnt++] = temp;
+            }
+        }
+    }
+ 
+    for (int i = 0; i < cnt; i++)
+    {
+        int room = changeSeat[i]->room;
+        train[room][0].heapPush(changeSeat[i], 0);
+        train[room][1].heapPush(changeSeat[i], 1);
+    }
+ 
+    return sum;
 }
+ 
+#endif
