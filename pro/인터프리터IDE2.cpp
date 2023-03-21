@@ -193,3 +193,136 @@ void eraseCommand(){
 int getValue(char mVariable){
 	return prev(cur, 1)->value[mVariable - 'A'];;
 }
+
+// 23.03.21 : 85% 계산 쪽, init에서 {}주고 end로 설정하는 것 부족
+#include <list>
+#include <memory.h>
+#include <cctype>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+struct listData {
+	string form;
+	int value[26];
+};
+list<listData> interpreter;
+list<listData>::iterator pre, cur;
+
+int lineIdx;
+int numIdx, operIdx;
+int numStack[100];
+char operStack[100];
+
+void calc() {
+	numIdx--; operIdx--;
+	if (operStack[operIdx] == '*') numStack[numIdx - 1] *= numStack[numIdx];
+	else if (operStack[operIdx] == '+') numStack[numIdx - 1] += numStack[numIdx];
+	else if (operStack[operIdx] == '-') numStack[numIdx - 1] = max(0, numStack[numIdx - 1] - numStack[numIdx]);
+	else if (operStack[operIdx] == '/') numStack[numIdx - 1] = numStack[numIdx] == 0 ? 0 : numStack[numIdx - 1] / numStack[numIdx];
+	numStack[numIdx - 1] %= 10000;
+}
+
+//void calc() {
+//	if (operIdx && operStack[operIdx - 1] != '(') {
+//		numIdx--, operIdx--;
+//		if (operStack[operIdx] == '+') numStack[numIdx - 1] += numStack[numIdx];
+//		if (operStack[operIdx] == '-') numStack[numIdx - 1] -= numStack[numIdx];
+//		if (operStack[operIdx] == '*') numStack[numIdx - 1] *= numStack[numIdx];
+//		if (operStack[operIdx] == '/') numStack[numIdx - 1] = numStack[numIdx] ? numStack[numIdx - 1] / numStack[numIdx] : 0;
+//		numStack[numIdx - 1] = max(0, numStack[numIdx - 1]) % 10000;
+//	}
+//}
+
+int calculate(string str) {
+	numIdx = operIdx = 0;
+	for (char ch : str) {
+		if (isdigit(ch)) numStack[numIdx++] = ch - '0';
+		else if (isalpha(ch)) numStack[numIdx++] = prev(cur, 1)->value[ch - 'A'];
+		else if (ch == ')') {
+			if (operIdx > 0 && operStack[operIdx - 1] != '(') calc(); // 어차피 바로 바로 계산하니 while이든 if든 한개
+			operIdx--;
+		}
+		else if (ch == '(') {
+			operStack[operIdx++] = ch;
+		}
+		else {
+			if (operIdx > 0 && operStack[operIdx - 1] != '(') calc(); // operStack[] != '(' 빼먹으면 안됨, ) 들어오기 전까지는 계산을 하고 있으니까
+			operStack[operIdx++] = ch;
+		}
+	}
+	calc();
+	return numStack[0];
+}
+
+//int calculate(string command) {
+//	numIdx = operIdx = 0;
+//	for (int i = 0; i < command.size(); i++) {
+//		if (isdigit(command[i])) numStack[numIdx++] = command[i] - '0';
+//		else if (isalpha(command[i])) numStack[numIdx++] = pre->value[command[i] - 'A'];
+//		else {
+//			if (command[i] != '(') calc();
+//			if (command[i] == ')') operIdx--;
+//			else operStack[operIdx++] = command[i];
+//		}
+//	}
+//	calc();
+//	return numStack[0];
+//}
+
+void parsing() {
+	pre = prev(cur, 1);
+	memcpy(cur->value, pre->value, sizeof(int) * 26);
+	int s, e;
+	int i = 0;
+
+	string com = cur->form + ',';
+	for (s = com.find('=') + 1; s < com.size(); s = e+1) {
+		e = com.find(',', s);
+		cur->value[com[i] - 'A'] = calculate(com.substr(s, e - s));
+		i += 2;
+	}
+}
+
+void init(){
+	lineIdx = 1;
+	interpreter.clear();
+	interpreter.push_back({});
+	cur = interpreter.end();
+}
+
+void destroy() {}
+
+int addCommand(char mCommand[]){
+	cur = interpreter.insert(cur, { mCommand });
+	return lineIdx;
+}
+
+int moveCursor(int mPos){
+	for (int i = 0; i < mPos; i++) {
+		if (cur != interpreter.end()) {
+			parsing();
+			lineIdx++;
+			cur++;
+		}
+		else break;
+	}
+	for (int i = 0; i < -mPos; i++) {
+		if (lineIdx > 1) {
+			lineIdx--;
+			cur--;
+		}
+		else break;
+	}
+	return lineIdx;
+}
+
+void eraseCommand(){
+	if (cur != interpreter.end()) cur = interpreter.erase(cur);
+}
+
+int getValue(char mVariable){
+	pre = prev(cur, 1);
+	return pre->value[mVariable - 'A'];
+}

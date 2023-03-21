@@ -182,3 +182,58 @@ int main() {
 	while (oi > 0) calculate();
 	cout << numStack[0];
 }
+
+// Whole 계산기 (두 자리 이상, 괄호, 우선순위)
+#include <iostream>
+#include <typeinfo>
+#include <string>
+#include <cctype>
+
+using namespace std;
+
+int ni, oi;
+long long int numStack[100];
+char operStack[100];
+
+void calculate() {
+	ni--; oi--;
+	if (operStack[oi] == '*') numStack[ni - 1] *= numStack[ni];
+	else if (operStack[oi] == '+') numStack[ni - 1] += numStack[ni];
+	else if (operStack[oi] == '-') numStack[ni - 1] -= numStack[ni];
+	else numStack[ni - 1] /= numStack[ni];
+}
+
+int main() {
+	string s;
+	cin >> s;
+
+	ni = oi = 0;
+	int numb = 0;
+	for (int i = 0; s[i]; i++) {
+		if (isdigit(s[i])) {
+			numb = numb * 10 + s[i] - '0';
+			if (i == s.size() - 1 || !isdigit(s[i + 1])) {
+				numStack[ni++] = numb;
+				numb = 0;
+			}
+		}
+		else if (s[i] == '(') operStack[oi++] = '(';
+		else if (s[i] == ')') {
+			while (operStack[oi - 1] != '(') calculate();
+			oi--;
+		}
+		else {
+			if (s[i] == '*' || s[i] == '/') {
+                if(oi > 0) {
+				    if (operStack[oi - 1] == '*' || operStack[oi - 1] == '/') calculate();
+                }
+			}
+			else if (s[i] == '+' || s[i] == '-') {
+				while (oi > 0 && operStack[oi - 1] != '(')  calculate();
+			}
+			operStack[oi++] = s[i];
+		}
+	}
+	while (oi > 0) calculate();
+	cout << numStack[0];
+}
